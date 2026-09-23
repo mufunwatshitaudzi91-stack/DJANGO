@@ -1,2 +1,4 @@
-## Module 2: Models and Databases
-Starting work on Django's ORM — building a Book model to interact with a relational database using Python instead of raw SQL.
+## Module 2: Library App
+- Created a new app called `library`
+- Registered it in INSTALLED_APPS (settings.py)
+- Next: defining the Book model
