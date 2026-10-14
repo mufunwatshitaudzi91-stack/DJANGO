@@ -1,0 +1,40 @@
+{% extends 'library/base.html' %}
+{% load library_extras %}
+
+{% block title %}{{ book.title }} - My Library{% endblock %}
+
+{% block content %}
+    <h1>{{ book.full_title }}</h1>
+    <div class="card">
+    {% if book.cover_image %}
+     <img class="detail-cover" src="{{ book.cover_image.url }}"
+    alt="Cover of {{ book.title }}">
+    {% endif %}
+        <p>Author: {{ book.author }}</p>
+
+        {% if book.co_authors.all %}
+            <p>Co-authors:
+                {% for co in book.co_authors.all %}
+                    {{ co }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+
+        <p>Publisher: {{ book.publisher|default:"Unknown" }}</p>
+        <p>Genre: {{ book.get_genre_display }}</p>
+        <p>Published: {{ book.publication_date|date:"F j, Y" }} ({{ book.age }} years ago)</p>
+        <p>Pages: {{ book.pages }}</p>
+        <p>Rating: {{ book.rating|stars }} ({{ book.rating }}/5)</p>
+        <p>
+            {% if book.is_available %}
+                <span class="badge ok">Available</span>
+            {% else %}
+                <span class="badge no">Borrowed</span>
+            {% endif %}
+        </p>
+        <p>{{ book.summary }}</p>
+    </div>
+    <a href="{% url 'library:book-list' %}">&larr; Back to all books</a>
+    <a href="{% url 'library:book-update' book.pk %}">Edit this book</a>
+    <a href="{% url 'library:book-delete' book.pk %}">Delete this book</a>
+{% endblock %}

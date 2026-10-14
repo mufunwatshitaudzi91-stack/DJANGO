@@ -1,0 +1,62 @@
+{% extends 'library/base.html' %}
+{% load library_extras %}
+
+{% block title %}Books - My Library{% endblock %}
+
+{% block content %}
+    <h1>Library Books</h1>
+
+    <form method="get">
+        <input type="text" name="q" placeholder="Search title or author"
+               value="{{ search_query }}">
+        <select name="genre">
+            <option value="">All genres</option>
+            {% for code, label in genre_choices %}
+                <option value="{{ code }}" {% if code == genre_filter %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Search</button>
+        <a href="{% url 'library:book-list' %}">Clear</a>
+    </form>
+
+    <p>{{ paginator.count }} book{{ paginator.count|pluralize }} found</p>
+
+    <div class="book-grid">
+        {% for book in books %}
+            <a class="book-card" href="{% url 'library:book-detail' book.pk %}">
+                {% if book.cover_image %}
+                    <img class="cover" src="{{ book.cover_image.url }}"
+                         alt="Cover of {{ book.title }}">
+                {% else %}
+                    <div class="cover no-cover">{{ book.title }}</div>
+                {% endif %}
+                <div class="book-info">
+                    <strong>{{ book.title }}</strong>
+                    <span class="meta">{{ book.author }}</span>
+                    <span class="meta">{{ book.rating|stars }}</span>
+                    {% if book.is_available %}
+                        <span class="badge ok">Available</span>
+                    {% else %}
+                        <span class="badge no">Borrowed</span>
+                    {% endif %}
+                </div>
+            </a>
+        {% empty %}
+            <p>No books match your search.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        <p>
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query|urlencode }}&genre={{ genre_filter|urlencode }}">&laquo; Previous</a>
+            {% endif %}
+            Page {{ page_obj.number }} of {{ paginator.num_pages }}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ search_query|urlencode }}&genre={{ genre_filter|urlencode }}">Next &raquo;</a>
+            {% endif %}
+        </p>
+    {% endif %}
+{% endblock %}
