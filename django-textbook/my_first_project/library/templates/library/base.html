@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}My Library{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'library/style.css' %}">
+</head>
+<body>
+    {% include 'library/_navbar.html' %}
+
+    <main>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="card">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; {% now "Y" %} My Library</p>
+    </footer>
+</body>
+</html>
