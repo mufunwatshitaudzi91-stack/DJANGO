@@ -23,6 +23,14 @@
 
     <p>{{ paginator.count }} book{{ paginator.count|pluralize }} found</p>
 
+    {% if recent_books %}
+        <div class="card">
+            <strong>Recently viewed:</strong>
+            {% for b in recent_books %}
+                <a href="{% url 'library:book-detail' b.pk %}">{{ b.title }}</a>{% if not forloop.last %} &middot; {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
     <div class="book-grid">
         {% for book in books %}
             <a class="book-card" href="{% url 'library:book-detail' book.pk %}">

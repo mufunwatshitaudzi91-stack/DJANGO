@@ -1,0 +1,35 @@
+{% extends 'library/base.html' %}
+
+{% block title %}{{ title }} - My Library{% endblock %}
+
+{% block content %}
+    {% if validlink is False %}
+        <h1>This link is not valid</h1>
+        <div class="card">
+            <p>The password reset link is invalid, probably because it was already used or has expired.</p>
+            <p><a href="{% url 'password_reset' %}">Request a new reset link</a></p>
+        </div>
+    {% else %}
+        <h1>{{ title }}</h1>
+        {% if intro %}<p>{{ intro }}</p>{% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit">{{ button }}</button>
+        </form>
+    {% endif %}
+{% endblock %}

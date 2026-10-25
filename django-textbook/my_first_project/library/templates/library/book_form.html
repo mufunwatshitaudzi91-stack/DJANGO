@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>{{ heading }}</h1>
-    <form method="post" enctype="multipart/form-data"></form>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.non_field_errors }}
 

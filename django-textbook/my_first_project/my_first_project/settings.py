@@ -10,22 +10,32 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Read secrets from the private .env file (it is not committed to Git)
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%@(-q7n6p#i_%7#oyz((#8mn(3fvq(p_9iw*ps)_1m&^p=#v&e'
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'django-insecure-development-only-key'
+    else:
+        raise RuntimeError('Set the SECRET_KEY environment variable.')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h for h in os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if h]
 
 
 # Application definition
@@ -39,7 +49,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'hello_world',
     'library',
-    
 ]
 
 MIDDLEWARE = [
@@ -80,7 +89,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mydatabase',
         'USER': 'root',
-        'PASSWORD': 'sandra3108!',
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -134,3 +143,19 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'library:book-list'
+LOGOUT_REDIRECT_URL = 'library:book-list'
+
+
+# Settings that only make sense on a real HTTPS website (they stay off while DEBUG is True)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 3600  # raise to 31536000 (1 year) once HTTPS works for sure
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
