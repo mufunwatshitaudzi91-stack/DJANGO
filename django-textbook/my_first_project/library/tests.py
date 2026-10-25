@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -83,6 +84,12 @@ class BookFormTests(LibraryTestCase):
 
 
 class BookEditViewTests(LibraryTestCase):
+    """Adding and deleting now needs a logged-in user."""
+
+    def setUp(self):
+        user = User.objects.create_superuser('tester', 'tester@example.com', 'pass12345')
+        self.client.force_login(user)
+
     def test_create_book(self):
         response = self.client.post(reverse('library:book-create'), self.valid_data())
         new_book = Book.objects.get(title='Animal Farm')
@@ -93,6 +100,42 @@ class BookEditViewTests(LibraryTestCase):
         response = self.client.post(reverse('library:book-delete', args=[self.book.pk]))
         self.assertRedirects(response, reverse('library:book-list'))
         self.assertFalse(Book.objects.filter(pk=self.book.pk).exists())
+
+
+class LoginRequiredTests(LibraryTestCase):
+    """Logged-out visitors can read, but cannot add, edit or delete."""
+
+    def test_list_is_public(self):
+        response = self.client.get(reverse('library:book-list'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_redirects_to_login(self):
+        url = reverse('library:book-create')
+        response = self.client.get(url)
+        self.assertRedirects(response, f"{reverse('login')}?next={url}")
+
+    def test_edit_redirects_to_login(self):
+        url = reverse('library:book-update', args=[self.book.pk])
+        response = self.client.get(url)
+        self.assertRedirects(response, f"{reverse('login')}?next={url}")
+
+    def test_delete_redirects_to_login_and_keeps_book(self):
+        url = reverse('library:book-delete', args=[self.book.pk])
+        response = self.client.post(url)
+        self.assertRedirects(response, f"{reverse('login')}?next={url}")
+        self.assertTrue(Book.objects.filter(pk=self.book.pk).exists())
+
+    def test_login_page_loads(self):
+        response = self.client.get(reverse('login'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_can_log_in_and_out(self):
+        User.objects.create_user('reader', password='pass12345')
+        response = self.client.post(
+            reverse('login'), {'username': 'reader', 'password': 'pass12345'})
+        self.assertRedirects(response, reverse('library:book-list'))
+        response = self.client.post(reverse('logout'))
+        self.assertRedirects(response, reverse('library:book-list'))
 
 
 class StarsFilterTests(TestCase):

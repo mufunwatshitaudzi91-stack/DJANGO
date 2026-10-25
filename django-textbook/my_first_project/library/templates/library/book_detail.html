@@ -6,10 +6,10 @@
 {% block content %}
     <h1>{{ book.full_title }}</h1>
     <div class="card">
-    {% if book.cover_image %}
-     <img class="detail-cover" src="{{ book.cover_image.url }}"
-    alt="Cover of {{ book.title }}">
-    {% endif %}
+        {% if book.cover_image %}
+            <img class="detail-cover" src="{{ book.cover_image.url }}"
+                 alt="Cover of {{ book.title }}">
+        {% endif %}
         <p>Author: {{ book.author }}</p>
 
         {% if book.co_authors.all %}
@@ -35,6 +35,10 @@
         <p>{{ book.summary }}</p>
     </div>
     <a href="{% url 'library:book-list' %}">&larr; Back to all books</a>
-    <a href="{% url 'library:book-update' book.pk %}">Edit this book</a>
-    <a href="{% url 'library:book-delete' book.pk %}">Delete this book</a>
+        {% if perms.library.change_book %}
+        <a href="{% url 'library:book-update' book.pk %}">Edit this book</a>
+    {% endif %}
+    {% if perms.library.delete_book %}
+        <a href="{% url 'library:book-delete' book.pk %}">Delete this book</a>
+    {% endif %}
 {% endblock %}

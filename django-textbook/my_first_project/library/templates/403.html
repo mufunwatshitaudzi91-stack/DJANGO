@@ -1,0 +1,12 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Not allowed - My Library{% endblock %}
+
+{% block content %}
+    <h1>You don't have permission to do that</h1>
+    <div class="card">
+        <p>Your account can browse the library, but it can't add, edit or delete books.</p>
+        <p>If you think this is a mistake, ask a librarian to add you to the Librarians group.</p>
+    </div>
+    <a href="{% url 'library:book-list' %}">&larr; Back to all books</a>
+{% endblock %}
